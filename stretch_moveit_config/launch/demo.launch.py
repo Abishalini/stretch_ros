@@ -100,12 +100,25 @@ def generate_launch_description():
     joint_limits_yaml = {'robot_description_planning': load_joint_limits_from_config()}
 
     # Planning Functionality
-    ompl_planning_pipeline_config = {'move_group': {
-        'planning_plugin': 'ompl_interface/OMPLPlanner',
-        'request_adapters': """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
-        'start_state_max_bounds_error': 0.1}}
-    ompl_planning_yaml = load_yaml('stretch_moveit_config', 'config/ompl_planning.yaml')
-    ompl_planning_pipeline_config['move_group'].update(ompl_planning_yaml)
+    planning_pipelines_config = {
+        "default_planning_pipeline": "ompl",
+        "planning_pipelines": ["ompl"],
+        "ompl": {
+            "planning_plugins": ["ompl_interface/OMPLPlanner"],
+            "request_adapters": [
+                "default_planning_request_adapters/ResolveConstraintFrames",
+                "default_planning_request_adapters/ValidateWorkspaceBounds",
+                "default_planning_request_adapters/CheckStartStateBounds",
+                "default_planning_request_adapters/CheckStartStateCollision",
+            ],
+            "response_adapters": [
+                "default_planning_response_adapters/AddTimeOptimalParameterization",
+                "default_planning_response_adapters/ValidateSolution",
+            ],
+        },
+    }
+    ompl_planning_yaml = load_yaml("stretch_moveit_config", "config/ompl_planning.yaml")
+    planning_pipelines_config["ompl"].update(ompl_planning_yaml)
 
     # Trajectory Execution Functionality
     controllers_yaml = load_yaml('stretch_moveit_config', 'config/moveit_simple_controllers.yaml')
@@ -131,7 +144,7 @@ def generate_launch_description():
                                            kinematics_yaml,
                                            sensors_yaml,
                                            joint_limits_yaml,
-                                           ompl_planning_pipeline_config,
+                                           planning_pipelines_config,
                                            trajectory_execution,
                                            moveit_controllers,
                                            planning_scene_monitor_parameters])
@@ -146,7 +159,7 @@ def generate_launch_description():
                      arguments=['-d', rviz_config_file],
                      parameters=[robot_description,
                                  robot_description_semantic,
-                                 ompl_planning_pipeline_config,
+                                 planning_pipelines_config,
                                  kinematics_yaml])
     ld.add_action(rviz_node)
 
