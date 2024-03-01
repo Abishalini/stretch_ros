@@ -95,6 +95,10 @@ def generate_launch_description():
     robot_description_semantic = {'robot_description_semantic': robot_description_semantic_config}
 
     kinematics_yaml = load_yaml('stretch_moveit_config', 'config/kinematics.yaml')
+    robot_description_kinematics = {
+        "robot_description_kinematics": kinematics_yaml
+    }
+
     sensors_yaml = load_yaml('stretch_moveit_config', 'config/sensors_3d.yaml')
 
     joint_limits_yaml = {'robot_description_planning': load_joint_limits_from_config()}
@@ -141,7 +145,7 @@ def generate_launch_description():
                                output='screen',
                                parameters=[robot_description,
                                            robot_description_semantic,
-                                           kinematics_yaml,
+                                           robot_description_kinematics,
                                            sensors_yaml,
                                            joint_limits_yaml,
                                            planning_pipelines_config,
